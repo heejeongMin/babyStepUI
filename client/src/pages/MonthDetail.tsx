@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,38 +8,69 @@ import CategorySection from "@/components/CategorySection";
 import MilestoneCard from "@/components/MilestoneCard";
 import MonthTimeline from "@/components/MonthTimeline";
 import { getMonthData, getAllMonths } from "@/lib/monthData";
-import { ChecklistItem as ChecklistItemType } from "@shared/schema";
-import { ArrowLeft, Baby } from "lucide-react";
+import { ChecklistItem as ChecklistItemType, Baby, ChecklistProgress } from "@shared/schema";
+import { ArrowLeft } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
 
 interface MonthDetailProps {
+  selectedBaby: Baby;
   initialMonth: number;
   onNavigateBack: () => void;
 }
 
-export default function MonthDetail({ initialMonth, onNavigateBack }: MonthDetailProps) {
+export default function MonthDetail({ selectedBaby, initialMonth, onNavigateBack }: MonthDetailProps) {
   const [selectedMonth, setSelectedMonth] = useState(initialMonth);
   const [checklists, setChecklists] = useState<ChecklistItemType[]>([]);
+  const queryClient = useQueryClient();
 
   const monthData = getMonthData(selectedMonth);
   const availableMonths = getAllMonths();
 
+  const { data: progress = [] } = useQuery<ChecklistProgress[]>({
+    queryKey: ["/api/babies", selectedBaby.id, "progress"],
+  });
+
+  const updateProgressMutation = useMutation({
+    mutationFn: async ({ checklistItemId, completed }: { checklistItemId: string; completed: boolean }) => {
+      const response = await apiRequest(
+        "POST",
+        `/api/babies/${selectedBaby.id}/progress`,
+        { checklistItemId, completed }
+      );
+      return await response.json() as ChecklistProgress;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/babies", selectedBaby.id, "progress"] });
+    },
+  });
+
   useEffect(() => {
     const data = getMonthData(selectedMonth);
     if (data) {
-      setChecklists(data.checklists);
+      const checklistsWithProgress = data.checklists.map(item => ({
+        ...item,
+        completed: progress.some(p => p.checklistItemId === item.id && p.completed)
+      }));
+      setChecklists(checklistsWithProgress);
     }
-  }, [selectedMonth]);
+  }, [selectedMonth, progress]);
 
   if (!monthData) {
     return <div>Month not found</div>;
   }
 
   const handleToggleItem = (id: string) => {
+    const item = checklists.find(c => c.id === id);
+    if (!item) return;
+
+    const newCompleted = !item.completed;
     setChecklists(prev =>
       prev.map(item =>
-        item.id === id ? { ...item, completed: !item.completed } : item
+        item.id === id ? { ...item, completed: newCompleted } : item
       )
     );
+
+    updateProgressMutation.mutate({ checklistItemId: id, completed: newCompleted });
   };
 
   const getCategoryItems = (category: string) => {
@@ -49,8 +81,8 @@ export default function MonthDetail({ initialMonth, onNavigateBack }: MonthDetai
   const completedCount = checklists.filter(item => item.completed).length;
 
   return (
-    <div className="min-h-screen">
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+    <div className="min-h-screen pb-8">
+      <div className="bg-card border-b sticky top-[65px] z-40">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-4">
             <Button
@@ -62,10 +94,6 @@ export default function MonthDetail({ initialMonth, onNavigateBack }: MonthDetai
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back
             </Button>
-            <div className="flex items-center gap-2">
-              <Baby className="h-5 w-5 text-primary" />
-              <span className="font-semibold">Baby Care Guide</span>
-            </div>
           </div>
           <MonthTimeline
             selectedMonth={selectedMonth}
@@ -73,7 +101,7 @@ export default function MonthDetail({ initialMonth, onNavigateBack }: MonthDetai
             onSelectMonth={setSelectedMonth}
           />
         </div>
-      </header>
+      </div>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
         <div className="mb-8">

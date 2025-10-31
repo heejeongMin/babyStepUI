@@ -24,7 +24,11 @@ function AppContent() {
   });
 
   useEffect(() => {
+    console.log("here first?")
     const savedBabyId = localStorage.getItem("selectedBabyId");
+    console.log("savedBabyId")
+    console.log(savedBabyId)
+    console.log(babies)
     if (savedBabyId && babies.length > 0) {
       const baby = babies.find(b => b.id === savedBabyId);
       if (baby) {
@@ -110,9 +114,9 @@ function AppContent() {
       ) : (
         <>
           {currentView.type === 'home' && selectedBaby && (
-            <Home 
-              selectedBaby={selectedBaby} 
-              onNavigateToMonth={navigateToMonth} 
+            <Home
+              selectedBaby={selectedBaby}
+              onNavigateToMonth={navigateToMonth}
             />
           )}
           {currentView.type === 'month' && selectedBaby && (

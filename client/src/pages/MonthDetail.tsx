@@ -112,7 +112,7 @@ export default function MonthDetail({ selectedBaby, initialMonth, onNavigateBack
             <h1 className="text-3xl md:text-4xl font-bold">{monthData.title}</h1>
           </div>
           <p className="text-lg text-muted-foreground mb-6">{monthData.description}</p>
-          
+
           <ProgressBar
             current={completedCount}
             total={checklists.length}

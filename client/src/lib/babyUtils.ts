@@ -1,4 +1,5 @@
 import type { Baby } from "@shared/schema";
+import { i18n } from "i18next";
 
 export function calculateCurrentMonth(birthdate: Date | string): number {
   const birth = new Date(birthdate);
@@ -9,11 +10,11 @@ export function calculateCurrentMonth(birthdate: Date | string): number {
   return Math.max(0, Math.min(months, 24));
 }
 
-export function getAgeLabel(baby: Baby): string {
+export function getAgeLabel(baby: Baby, t: i18n): string {
   const months = calculateCurrentMonth(baby.birthdate);
-  if (months === 0) return "Newborn";
-  if (months === 1) return "1 month";
-  return `${months} months`;
+  if (months === 0) return t("newBorn");
+  if (months === 1) return t("ageLabelOneMonth", { month: months });
+  return t("ageLabel", { month: `${months}` });
 }
 
 export function getInitials(name: string): string {

@@ -1,4 +1,11 @@
 import { useState, useEffect } from "react";
+// import MenuItem from '@mui/material/MenuItem';
+// import Select, { SelectChangeEvent } from '@mui/material/Select';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
+
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider, useQuery } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -11,10 +18,16 @@ import AddBabyDialog from "@/components/AddBabyDialog";
 import ManageBabiesDialog from "@/components/ManageBabiesDialog";
 import type { Baby } from "@shared/schema";
 import { Baby as BabyIcon } from "lucide-react";
+import './i18n';
+import { useTranslation } from 'react-i18next';
+import i18n from "i18next";
+
 
 type View = { type: 'home' } | { type: 'month', month: number };
 
 function AppContent() {
+  const { t } = useTranslation("APP");
+
   const [currentView, setCurrentView] = useState<View>({ type: 'home' });
   const [selectedBaby, setSelectedBaby] = useState<Baby | null>(null);
   const [showManageBabies, setShowManageBabies] = useState(false);
@@ -24,11 +37,7 @@ function AppContent() {
   });
 
   useEffect(() => {
-    console.log("here first?")
     const savedBabyId = localStorage.getItem("selectedBabyId");
-    console.log("savedBabyId")
-    console.log(savedBabyId)
-    console.log(babies)
     if (savedBabyId && babies.length > 0) {
       const baby = babies.find(b => b.id === savedBabyId);
       if (baby) {
@@ -63,6 +72,11 @@ function AppContent() {
     }
   };
 
+  const handleChange = (event: SelectChangeEvent) => {
+    console.log(event.target.value);
+    i18n.changeLanguage(event.target.value);
+  }
+
   const navigateToMonth = (month: number) => {
     setCurrentView({ type: 'month', month });
   };
@@ -94,6 +108,19 @@ function AppContent() {
                 )}
                 <AddBabyDialog onBabyAdded={handleBabyAdded} />
                 <ThemeToggle />
+                <FormControl size="small" sx={{ m: 1, minWidth: 120 }}>
+                  <InputLabel id="demo-simple-select-standard-label">{i18n.language == 'ko' ? t("languageKo") : t("languageEn")}</InputLabel>
+                  <Select
+                    labelId="language-change-select"
+                    id="language-change-select"
+                    value={i18n.language}
+                    onChange={handleChange}
+                    label="language"
+                  >
+                    <MenuItem value={"ko"}>{t("languageKo")}</MenuItem>
+                    <MenuItem value={"en"}>{t("languageEn")}</MenuItem>
+                  </Select>
+                </FormControl>
               </div>
             </div>
           </div>

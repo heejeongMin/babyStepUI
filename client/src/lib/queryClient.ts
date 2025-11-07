@@ -13,7 +13,6 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined
 ): Promise<Response> {
-  console.log(`${BASE_URL}` + url);
   const res = await fetch(`${BASE_URL}` + url, {
     method,
     headers: data

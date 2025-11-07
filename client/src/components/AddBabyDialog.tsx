@@ -49,7 +49,6 @@ export default function AddBabyDialog({ onBabyAdded }: AddBabyDialogProps) {
       setOpen(false);
       setName("");
       setBirthdate("");
-      console.log(onBabyAdded);
       onBabyAdded?.(baby);
     },
     onError: () => {

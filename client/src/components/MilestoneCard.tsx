@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface MilestoneCardProps {
   milestones: string[];
@@ -8,16 +9,20 @@ interface MilestoneCardProps {
 }
 
 export default function MilestoneCard({ milestones, tips }: MilestoneCardProps) {
+  const { t } = useTranslation("MONTH");
   return (
     <div className="grid gap-6 md:grid-cols-2">
       <Card data-testid="card-milestones">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CheckCircle2 className="h-5 w-5 text-chart-3" />
-            Developmental Milestones
+            {t("developmentalMilestones")}
           </CardTitle>
         </CardHeader>
         <CardContent>
+          <p className="text-xs text-muted-foreground mb-3" data-testid="text-milestones-note">
+            {t("milestonesNote")}
+          </p>
           <ul className="space-y-3">
             {milestones.map((milestone, idx) => (
               <li key={idx} className="flex items-start gap-2" data-testid={`milestone-${idx}`}>
@@ -31,7 +36,7 @@ export default function MilestoneCard({ milestones, tips }: MilestoneCardProps) 
 
       <Card data-testid="card-tips">
         <CardHeader>
-          <CardTitle>Helpful Tips</CardTitle>
+          <CardTitle>{t("helpfulTips")}</CardTitle>
         </CardHeader>
         <CardContent>
           <ul className="space-y-3">

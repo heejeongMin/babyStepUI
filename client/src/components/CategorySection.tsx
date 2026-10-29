@@ -2,6 +2,7 @@ import { ChecklistItem as ChecklistItemType } from "@shared/schema";
 import ChecklistItem from "./ChecklistItem";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from "react-i18next";
 import { Heart, Blocks, TrendingUp, Moon, UtensilsCrossed, ShieldCheck } from "lucide-react";
 
 interface CategorySectionProps {
@@ -20,6 +21,7 @@ const categoryConfig = {
 };
 
 export default function CategorySection({ category, items, onToggleItem }: CategorySectionProps) {
+  const { t } = useTranslation("MONTH");
   const config = categoryConfig[category as keyof typeof categoryConfig];
   const Icon = config?.icon || Heart;
   const completed = items.filter(item => item.completed).length;
@@ -30,7 +32,7 @@ export default function CategorySection({ category, items, onToggleItem }: Categ
       <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-4">
         <div className="flex items-center gap-2">
           <Icon className={`h-5 w-5 ${config?.color || 'text-primary'}`} />
-          <CardTitle className="text-lg">{config?.label || category}</CardTitle>
+          <CardTitle className="text-lg">{t(`category.${category}`, { defaultValue: config?.label || category })}</CardTitle>
         </div>
         <Badge variant="secondary" data-testid={`badge-progress-${category}`}>
           {completed}/{total}

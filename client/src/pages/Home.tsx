@@ -1,11 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import MonthCard from "@/components/MonthCard";
-import { monthsData } from "@/lib/monthData";
+import SourcesDialog from "@/components/SourcesDialog";
+import { getMonthsData } from "@/lib/monthData";
 import { ArrowRight } from "lucide-react";
 import heroImage from "@assets/generated_images/Parent_holding_happy_baby_64d932c1.png";
-import sittingImage from "@assets/generated_images/Baby_sitting_milestone_10b3d727.png";
-import crawlingImage from "@assets/generated_images/Baby_crawling_milestone_10bece49.png";
 import type { Baby, ChecklistProgress } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { calculateCurrentMonth, getAgeLabel } from "@/lib/babyUtils";
@@ -19,10 +18,16 @@ interface HomeProps {
 
 export default function Home({ selectedBaby, onNavigateToMonth }: HomeProps) {
   const queryClient = useQueryClient();
-  const { t } = useTranslation("HOME");
+  const { t, i18n } = useTranslation("HOME");
+  const { t: tMonth } = useTranslation("MONTH");
+  const monthsData = getMonthsData(i18n.language);
 
   const { data: progress = [] } = useQuery<ChecklistProgress[]>({
     queryKey: ["/api/babies", selectedBaby.id, "progress"],
+  });
+
+  const { data: photoMonths = [] } = useQuery<number[]>({
+    queryKey: ["/api/babies", selectedBaby.id, "photos"],
   });
 
   const updateProgressMutation = useMutation({
@@ -38,12 +43,6 @@ export default function Home({ selectedBaby, onNavigateToMonth }: HomeProps) {
       queryClient.invalidateQueries({ queryKey: ["/api/babies", selectedBaby.id, "progress"] });
     },
   });
-
-  const getMonthImage = (month: number) => {
-    if (month === 6) return sittingImage;
-    if (month === 12) return crawlingImage;
-    return undefined;
-  };
 
   const getCompletedCount = (month: number) => {
     const monthData = monthsData.find(m => m.month === month);
@@ -108,12 +107,18 @@ export default function Home({ selectedBaby, onNavigateToMonth }: HomeProps) {
               description={month.description}
               completedTasks={getCompletedCount(month.month)}
               totalTasks={month.checklists.length}
-              imageUrl={getMonthImage(month.month)}
+              babyId={selectedBaby.id}
+              hasPhoto={photoMonths.includes(month.month)}
+              isCurrent={month.month === currentMonth}
               onClick={() => onNavigateToMonth(month.month)}
             />
           ))}
         </div>
       </section>
+
+      <footer className="max-w-7xl mx-auto px-4 pb-12 text-xs text-muted-foreground">
+        {tMonth("disclaimer")} <SourcesDialog />
+      </footer>
     </div>
   );
 }

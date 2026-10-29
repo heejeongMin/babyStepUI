@@ -11,6 +11,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import type { Baby as BabyType } from "@shared/schema";
 import { ChevronDown } from "lucide-react";
+import { useTranslation } from 'react-i18next';
 
 interface BabySelectorProps {
   babies: BabyType[];
@@ -25,6 +26,8 @@ export default function BabySelector({
   onSelectBaby,
   onManageBabies,
 }: BabySelectorProps) {
+  const { t } = useTranslation("HOME");
+
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -40,9 +43,8 @@ export default function BabySelector({
     const months = Math.floor(
       (now.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 30.44)
     );
-    if (months === 0) return "Newborn";
-    if (months === 1) return "1 month";
-    return `${months} months`;
+    if (months === 0) return t("newBorn");
+    return t(months === 1 ? "ageLabelOneMonth" : "ageLabel", { month: months });
   };
 
   if (!selectedBaby && babies.length === 0) {
@@ -52,7 +54,7 @@ export default function BabySelector({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="gap-2" data-testid="button-baby-selector">
+        <Button variant="outline" className="gap-2 min-w-0" data-testid="button-baby-selector">
           {selectedBaby ? (
             <>
               <Avatar className="h-6 w-6">
@@ -60,19 +62,19 @@ export default function BabySelector({
                   {getInitials(selectedBaby.name)}
                 </AvatarFallback>
               </Avatar>
-              <span className="font-medium">{selectedBaby.name}</span>
+              <span className="font-medium truncate">{selectedBaby.name}</span>
             </>
           ) : (
             <>
               <Baby className="h-4 w-4" />
-              <span>Select Baby</span>
+              <span>{t("selectBaby")}</span>
             </>
           )}
-          <ChevronDown className="h-4 w-4 opacity-50" />
+          <ChevronDown className="h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>Your Babies</DropdownMenuLabel>
+        <DropdownMenuLabel>{t("yourBaby")}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {babies.map((baby) => (
           <DropdownMenuItem
@@ -98,7 +100,7 @@ export default function BabySelector({
         ))}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={onManageBabies} data-testid="button-manage-babies">
-          Manage Babies
+          {t("manageBaby")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -16,6 +16,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import type { Baby } from "@shared/schema";
+import { useTranslation } from 'react-i18next';
+
 
 interface AddBabyDialogProps {
   onBabyAdded?: (baby: Baby) => void;
@@ -27,6 +29,9 @@ export default function AddBabyDialog({ onBabyAdded }: AddBabyDialogProps) {
   const [birthdate, setBirthdate] = useState("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useTranslation("HOME");
+  const { t: tb } = useTranslation("BABY");
+
 
   const createBabyMutation = useMutation({
     mutationFn: async (data: { name: string; birthdate: string }) => {
@@ -43,8 +48,8 @@ export default function AddBabyDialog({ onBabyAdded }: AddBabyDialogProps) {
     onSuccess: (baby) => {
       queryClient.invalidateQueries({ queryKey: ["/api/babies"] });
       toast({
-        title: "Baby added!",
-        description: `${baby.name} has been added to your profile.`,
+        title: tb("added"),
+        description: tb("addedDesc", { name: baby.name }),
       });
       setOpen(false);
       setName("");
@@ -53,8 +58,8 @@ export default function AddBabyDialog({ onBabyAdded }: AddBabyDialogProps) {
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to add baby. Please try again.",
+        title: tb("error"),
+        description: tb("addFailed"),
         variant: "destructive",
       });
     },
@@ -64,8 +69,8 @@ export default function AddBabyDialog({ onBabyAdded }: AddBabyDialogProps) {
     e.preventDefault();
     if (!name || !birthdate) {
       toast({
-        title: "Missing information",
-        description: "Please fill in all fields.",
+        title: tb("missingInfo"),
+        description: tb("fillAll"),
         variant: "destructive",
       });
       return;
@@ -77,31 +82,31 @@ export default function AddBabyDialog({ onBabyAdded }: AddBabyDialogProps) {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button data-testid="button-add-baby">
-          <Plus className="mr-2 h-4 w-4" />
-          Add Baby
+          <Plus className="mr-0 h-4 w-4" />
+          {/* {t("addBaby")} */}
         </Button>
       </DialogTrigger>
       <DialogContent data-testid="dialog-add-baby">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Add a Baby</DialogTitle>
+            <DialogTitle>{tb("addTitle")}</DialogTitle>
             <DialogDescription>
-              Add a baby profile to track their development and milestones.
+              {tb("addDesc")}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">{tb("name")}</Label>
               <Input
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Baby's name"
+                placeholder={tb("namePlaceholder")}
                 data-testid="input-baby-name"
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="birthdate">Birthdate</Label>
+              <Label htmlFor="birthdate">{tb("birthdate")}</Label>
               <Input
                 id="birthdate"
                 type="date"
@@ -117,7 +122,7 @@ export default function AddBabyDialog({ onBabyAdded }: AddBabyDialogProps) {
               disabled={createBabyMutation.isPending}
               data-testid="button-submit-baby"
             >
-              {createBabyMutation.isPending ? "Adding..." : "Add Baby"}
+              {createBabyMutation.isPending ? tb("adding") : tb("add")}
             </Button>
           </DialogFooter>
         </form>

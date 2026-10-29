@@ -21,6 +21,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import type { Baby } from "@shared/schema";
 import { Trash2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -43,6 +44,8 @@ export default function ManageBabiesDialog({
   const [babyToDelete, setBabyToDelete] = useState<Baby | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { t } = useTranslation("HOME");
+  const { t: tb } = useTranslation("BABY");
 
   const deleteBabyMutation = useMutation({
     mutationFn: async (babyId: string) => {
@@ -52,16 +55,16 @@ export default function ManageBabiesDialog({
     onSuccess: (babyId) => {
       queryClient.invalidateQueries({ queryKey: ["/api/babies"] });
       toast({
-        title: "Baby removed",
-        description: "The baby profile has been deleted.",
+        title: tb("removed"),
+        description: tb("removedDesc"),
       });
       setBabyToDelete(null);
       onBabyDeleted?.(babyId);
     },
     onError: () => {
       toast({
-        title: "Error",
-        description: "Failed to delete baby. Please try again.",
+        title: tb("error"),
+        description: tb("deleteFailed"),
         variant: "destructive",
       });
     },
@@ -82,9 +85,8 @@ export default function ManageBabiesDialog({
     const months = Math.floor(
       (now.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 30.44)
     );
-    if (months === 0) return "Newborn";
-    if (months === 1) return "1 month";
-    return `${months} months`;
+    if (months === 0) return t("newBorn");
+    return t(months === 1 ? "ageLabelOneMonth" : "ageLabel", { month: months });
   };
 
   return (
@@ -92,9 +94,9 @@ export default function ManageBabiesDialog({
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent data-testid="dialog-manage-babies">
           <DialogHeader>
-            <DialogTitle>Manage Babies</DialogTitle>
+            <DialogTitle>{tb("manageTitle")}</DialogTitle>
             <DialogDescription>
-              View and manage all baby profiles.
+              {tb("manageDesc")}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3">
@@ -124,7 +126,7 @@ export default function ManageBabiesDialog({
             ))}
             {babies.length === 0 && (
               <p className="text-center text-muted-foreground py-8">
-                No babies added yet.
+                {tb("noBabies")}
               </p>
             )}
           </div>
@@ -137,15 +139,14 @@ export default function ManageBabiesDialog({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Baby Profile?</AlertDialogTitle>
+            <AlertDialogTitle>{tb("deleteTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete {babyToDelete?.name}'s profile? This will
-              remove all their progress and cannot be undone.
+              {tb("deleteDesc", { name: babyToDelete?.name })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel data-testid="button-cancel-delete">
-              Cancel
+              {tb("cancel")}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={() =>
@@ -154,7 +155,7 @@ export default function ManageBabiesDialog({
               className="bg-destructive text-destructive-foreground"
               data-testid="button-confirm-delete"
             >
-              Delete
+              {tb("delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

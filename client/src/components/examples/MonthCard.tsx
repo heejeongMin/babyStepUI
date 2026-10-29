@@ -9,6 +9,8 @@ export default function MonthCardExample() {
       description="A major milestone month with sitting up and beginning solid foods."
       completedTasks={7}
       totalTasks={10}
+      babyId="example"
+      hasPhoto={false}
       onClick={() => console.log('Month card clicked')}
     />
   );

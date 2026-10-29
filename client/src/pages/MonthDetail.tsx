@@ -8,8 +8,10 @@ import CategorySection from "@/components/CategorySection";
 import MilestoneCard from "@/components/MilestoneCard";
 import MonthTimeline from "@/components/MonthTimeline";
 import { getMonthData, getAllMonths } from "@/lib/monthData";
+import SourcesDialog from "@/components/SourcesDialog";
 import { ChecklistItem as ChecklistItemType, Baby, ChecklistProgress } from "@shared/schema";
 import { ArrowLeft } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { apiRequest } from "@/lib/queryClient";
 
 interface MonthDetailProps {
@@ -22,8 +24,9 @@ export default function MonthDetail({ selectedBaby, initialMonth, onNavigateBack
   const [selectedMonth, setSelectedMonth] = useState(initialMonth);
   const [checklists, setChecklists] = useState<ChecklistItemType[]>([]);
   const queryClient = useQueryClient();
+  const { t, i18n } = useTranslation("MONTH");
 
-  const monthData = getMonthData(selectedMonth);
+  const monthData = getMonthData(selectedMonth, i18n.language);
   const availableMonths = getAllMonths();
 
   const { data: progress = [] } = useQuery<ChecklistProgress[]>({
@@ -45,7 +48,7 @@ export default function MonthDetail({ selectedBaby, initialMonth, onNavigateBack
   });
 
   useEffect(() => {
-    const data = getMonthData(selectedMonth);
+    const data = getMonthData(selectedMonth, i18n.language);
     if (data) {
       const checklistsWithProgress = data.checklists.map(item => ({
         ...item,
@@ -53,10 +56,10 @@ export default function MonthDetail({ selectedBaby, initialMonth, onNavigateBack
       }));
       setChecklists(checklistsWithProgress);
     }
-  }, [selectedMonth, progress]);
+  }, [selectedMonth, progress, i18n.language]);
 
   if (!monthData) {
-    return <div>Month not found</div>;
+    return <div>{t("monthNotFound")}</div>;
   }
 
   const handleToggleItem = (id: string) => {
@@ -92,7 +95,7 @@ export default function MonthDetail({ selectedBaby, initialMonth, onNavigateBack
               data-testid="button-back"
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
+              {t("back")}
             </Button>
           </div>
           <MonthTimeline
@@ -116,17 +119,17 @@ export default function MonthDetail({ selectedBaby, initialMonth, onNavigateBack
           <ProgressBar
             current={completedCount}
             total={checklists.length}
-            label="Overall Progress"
+            label={t("overallProgress")}
           />
         </div>
 
         <Tabs defaultValue="checklists" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2 max-w-md">
             <TabsTrigger value="checklists" data-testid="tab-checklists">
-              Checklists
+              {t("checklists")}
             </TabsTrigger>
             <TabsTrigger value="milestones" data-testid="tab-milestones">
-              Milestones & Tips
+              {t("milestonesTips")}
             </TabsTrigger>
           </TabsList>
 
@@ -145,6 +148,9 @@ export default function MonthDetail({ selectedBaby, initialMonth, onNavigateBack
             <MilestoneCard milestones={monthData.milestones} tips={monthData.tips} />
           </TabsContent>
         </Tabs>
+        <p className="mt-8 text-xs text-muted-foreground" data-testid="text-disclaimer">
+          {t("disclaimer")} <SourcesDialog />
+        </p>
       </main>
     </div>
   );

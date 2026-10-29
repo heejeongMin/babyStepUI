@@ -1,13 +1,18 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { BASE_URL } from "./config";
+import { authHeaders, getToken, setToken, LOGOUT_EVENT } from "./auth";
 
 async function throwIfResNotOk(res: Response) {
+  if (res.status === 401 && getToken()) {
+    // our token was rejected: expired or invalid
+    setToken(null);
+    window.dispatchEvent(new Event(LOGOUT_EVENT));
+  }
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
     throw new Error(`${res.status}: ${text}`);
   }
 }
-const BASE_URL = "http://localhost:8080";
-
 export async function apiRequest(
   method: string,
   url: string,
@@ -15,11 +20,10 @@ export async function apiRequest(
 ): Promise<Response> {
   const res = await fetch(`${BASE_URL}` + url, {
     method,
-    headers: data
-      ? {
-          "Content-Type": "application/json",
-        }
-      : {},
+    headers: {
+      ...authHeaders(),
+      ...(data ? { "Content-Type": "application/json" } : {}),
+    },
     body: data ? JSON.stringify(data) : undefined,
     // credentials: "include",
   });
@@ -35,7 +39,7 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     const res = await fetch((BASE_URL + queryKey.join("/")) as string, {
-      // credentials: "include",
+      headers: authHeaders(),
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {

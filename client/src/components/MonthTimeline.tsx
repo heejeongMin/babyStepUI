@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { useTranslation } from "react-i18next";
 
 interface MonthTimelineProps {
   selectedMonth: number;
@@ -8,11 +9,9 @@ interface MonthTimelineProps {
 }
 
 export default function MonthTimeline({ selectedMonth, availableMonths, onSelectMonth }: MonthTimelineProps) {
-  const getMonthLabel = (month: number) => {
-    if (month === 0) return "Newborn";
-    if (month === 1) return "1 mo";
-    return `${month} mo`;
-  };
+  const { t } = useTranslation("MONTH");
+  const getMonthLabel = (month: number) =>
+    month === 0 ? t("newborn") : t("monthShort", { month });
 
   return (
     <ScrollArea className="w-full" data-testid="month-timeline">

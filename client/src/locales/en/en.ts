@@ -84,6 +84,7 @@ export const AUTH = {
   resetDone: "Your password was changed. Log in with the new one.",
   tagline: "Track your baby's growth month by month",
   privacy: "Your baby's information is only visible to your account.",
+  privacyPolicy: "Privacy Policy",
   errors: {
     invalidCredentials: "Incorrect email or password.",
     emailTaken: "That email is already registered.",

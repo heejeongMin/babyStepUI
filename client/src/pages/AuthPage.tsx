@@ -285,7 +285,12 @@ export default function AuthPage({ onAuthenticated }: AuthPageProps) {
           </CardContent>
         </Card>
 
-        <p className="mt-4 text-center text-xs text-muted-foreground">{t("privacy")}</p>
+        <p className="mt-4 text-center text-xs text-muted-foreground">
+          {t("privacy")}{" "}
+          <a href="/privacy" target="_blank" rel="noreferrer" className="underline" data-testid="link-privacy-policy">
+            {t("privacyPolicy")}
+          </a>
+        </p>
       </div>
     </div>
   );

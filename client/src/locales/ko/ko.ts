@@ -82,6 +82,7 @@ export const AUTH = {
   resetDone: "비밀번호를 변경했어요. 새 비밀번호로 로그인해 주세요.",
   tagline: "아기의 성장을 개월별로 기록하고 확인해요",
   privacy: "아기 정보는 내 계정에서만 볼 수 있어요.",
+  privacyPolicy: "개인정보 처리방침",
   errors: {
     invalidCredentials: "이메일 또는 비밀번호가 올바르지 않아요.",
     emailTaken: "이미 가입된 이메일이에요.",

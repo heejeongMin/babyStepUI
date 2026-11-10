@@ -3,6 +3,9 @@ import { BASE_URL } from "./config";
 import { authHeaders, getToken, setToken, LOGOUT_EVENT } from "./auth";
 
 async function throwIfResNotOk(res: Response) {
+  // rolling session: the server sends a fresh token once the current one is past half its life
+  const refreshed = res.headers.get("X-Refreshed-Token");
+  if (refreshed && getToken()) setToken(refreshed);
   if (res.status === 401 && getToken()) {
     // our token was rejected: expired or invalid
     setToken(null);
